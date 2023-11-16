@@ -47,6 +47,11 @@ struct UserController: UserHandlerProtocol {
         let userId = req.parameters.get("id", as: UUID.self)
         return try await UserService.delete(req, object: userId)
     }
+    
+    func getMonitorSchedule(_ req: Request) async throws -> [String] {
+        let userId = req.parameters.get("id", as: UUID.self)
+        return try await UserService.getMonitorSchedule(req, object: userId)
+    }
 }
 
 extension UserController: SearchUserHandlerProtocol {

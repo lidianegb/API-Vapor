@@ -40,6 +40,7 @@ func routes(_ app: Application) throws {
     adminTokenAuthGroup.delete("\(RoutesEnum.users.rawValue)", "\(RoutesEnum.delete.rawValue)", "\(RouterParameter.id.rawValue)", use: userController.delete(_:))
     tokenAuthGroup.get("\(RoutesEnum.monitors.rawValue)", use: userController.getMonitors(_:))
     adminTokenAuthGroup.get("\(RoutesEnum.users.rawValue)", "\(RoutesEnum.profile.rawValue)", "\(RoutesEnum.search.rawValue)", "\(RouterParameter.term.rawValue)", use: userController.search(_:))
+    tokenAuthGroup.get("\(RoutesEnum.monitors.rawValue)", "\(RouterParameter.id.rawValue)", "\(RoutesEnum.schedule.rawValue)", use: userController.getMonitorSchedule(_:))
     
     // MARK: Appointments Routes
     

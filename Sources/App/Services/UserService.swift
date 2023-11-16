@@ -86,6 +86,13 @@ struct UserService: UserProtocol {
         return .ok
     }
     
+    static func getMonitorSchedule(_ req: Request, object: UUID?) async throws -> [String] {
+        guard let user = try await User.find(object, on: req.db) else {
+            throw Abort(.notFound, reason: "The monitor with ID of \(String(describing: object)) could not be found!")
+        }
+        
+        return user.schedule?.map { $0.description } ?? []
+    }
 }
 
 extension UserService: SearchUserProtocol {
