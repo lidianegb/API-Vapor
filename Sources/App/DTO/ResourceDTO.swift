@@ -11,10 +11,10 @@ import Fluent
 
 struct CreateResourceDTO: Content {
     let type: ResourceType.RawValue
-    let content: String?
+    let content: File?
 }
 
 struct UpdateResourceDTO: Content {
     let type: ResourceType.RawValue?
-    let content: String?
+    let content: File?
 }

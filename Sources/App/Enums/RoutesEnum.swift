@@ -18,6 +18,7 @@ enum RoutesEnum: String {
     case list = "listar"
     case filter = "filtrar"
     case schedule = "agenda"
+    case upload
     
     case appointments = "agendamentos"
     case publications = "publicacoes"

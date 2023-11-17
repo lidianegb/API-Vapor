@@ -17,6 +17,9 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
 
+    app.middleware.use(FileMiddleware(publicDirectory: app.directory.workingDirectory))
+    app.routes.defaultMaxBodySize = "30 MB"
+    
     // MARK: Migration Setup
     app.migrations.add(UserMigration())
     app.migrations.add(TokenMigration())

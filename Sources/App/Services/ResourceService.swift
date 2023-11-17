@@ -19,9 +19,20 @@ struct ResourceService: ResourceProtocol {
     typealias updateDTO = UpdateResourceDTO
     
     static func create(_ req: Vapor.Request, _ createDTO: CreateResourceDTO) async throws -> Resource.Public {
+        var contentURL: String = ""
+        if let file = createDTO.content {
+            try await req.fileio
+                .writeFile(file.data, at: file.filename)
+            
+            let serverConfig = req.application.http.server.configuration
+            let hostname = serverConfig.hostname
+            let port = serverConfig.port
+            contentURL = "\(hostname):\(port)/\(file.filename)"
+        }
+        
         let resource = Resource(
             type: createDTO.type,
-            content: createDTO.content,
+            content: contentURL,
             createdAt: Date(),
             updatedAt: Date()
         )
@@ -46,8 +57,18 @@ struct ResourceService: ResourceProtocol {
         guard let resource = try await Resource.find(object, on: req.db) else {
             throw Abort(.notFound, reason: "The resource with ID of \(String(describing: object)) could not be found!")
         }
+        var contentURL = resource.content
+        if let file = updateDTO.content {
+            try await req.fileio
+                .writeFile(file.data, at: file.filename)
+            
+            let serverConfig = req.application.http.server.configuration
+            let hostname = serverConfig.hostname
+            let port = serverConfig.port
+            contentURL = "\(hostname):\(port)/\(file.filename)"
+        }
         resource.type = updateDTO.type ?? resource.type
-        resource.content = updateDTO.content ?? resource.content
+        resource.content = contentURL
         resource.updatedAt = Date()
         
         try await resource.save(on: req.db)
