@@ -12,13 +12,13 @@ import Fluent
 struct CreatePublicationDTO: Content {
     let title: String?
     let text: String?
-    let videos: [String]?
-    let images: [String]?
+    let videos: [File]?
+    let images: [File]?
 }
 
 struct UpdatePublicationDTO: Content {
     let title: String?
     let text: String?
-    let videos: [String]?
-    let images: [String]?
+    let videos: [File]?
+    let images: [File]?
 }

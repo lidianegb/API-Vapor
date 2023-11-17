@@ -19,11 +19,27 @@ struct PublicationService: PublicationProtocol {
     typealias status = HTTPStatus
     
     static func create(_ req: Vapor.Request, _ createDTO: CreatePublicationDTO) async throws -> Publication.Public {
+        var resultImages: [String] = []
+        var resultVideos: [String] = []
+        if let images = createDTO.images, let videos = createDTO.videos {
+            let serverConfig = req.application.http.server.configuration
+            let hostname = serverConfig.hostname
+            let port = serverConfig.port
+             _ = images.map { file in
+                _ = req.fileio.writeFile(file.data, at: file.filename)
+                 resultImages.append("\(hostname):\(port)/\(file.filename)")
+            }
+            _ = videos.map { file  in
+               _ = req.fileio.writeFile(file.data, at: file.filename)
+               resultVideos.append("\(hostname):\(port)/\(file.filename)")
+           }
+        }
+        
         let publication = Publication(
             title: createDTO.title,
             text: createDTO.text,
-            videos: createDTO.videos,
-            images: createDTO.images,
+            videos: resultVideos,
+            images: resultImages,
             createdAt: Date(),
             updatedAt: Date()
         )
@@ -48,10 +64,28 @@ struct PublicationService: PublicationProtocol {
         guard let publication = try await Publication.find(object, on: req.db) else {
             throw Abort(.notFound, reason: "The publication with ID of \(String(describing: object)) could not be found!")
         }
+        
+        var resultImages: [String] = publication.images ?? []
+        var resultVideos: [String] = publication.videos ?? []
+        if let images = updateDTO.images, let videos = updateDTO.videos {
+            let serverConfig = req.application.http.server.configuration
+            let hostname = serverConfig.hostname
+            let port = serverConfig.port
+             _ = images.map { file in
+                _ = req.fileio.writeFile(file.data, at: file.filename)
+                 resultImages.append("\(hostname):\(port)/\(file.filename)")
+            }
+            
+            _ = videos.map { file in
+               _ = req.fileio.writeFile(file.data, at: file.filename)
+                resultVideos.append("\(hostname):\(port)/\(file.filename)")
+           }
+        }
+    
         publication.title = updateDTO.title ?? publication.title
         publication.text = updateDTO.text ?? publication.text
-        publication.images = updateDTO.images ?? publication.images
-        publication.videos = updateDTO.videos ?? publication.videos
+        publication.images = resultImages
+        publication.videos = resultVideos
         publication.updatedAt = Date()
         
         try await publication.save(on: req.db)
