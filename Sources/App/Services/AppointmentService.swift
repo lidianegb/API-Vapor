@@ -32,10 +32,11 @@ struct AppointmentService: AppointmentProtocol {
             updatedAt: Date(),
             status: StatusEnum.scheduled.rawValue
         )
+        monitor?.schedule = monitor?.schedule?.filter { $0 != createDTO.date }
        
+        try await monitor?.save(on: req.db)
         try await appointment.save(on: req.db)
-      
-        try await user.save(on: req.db)
+        
         return appointment.convertToPublic()
     }
     
@@ -79,6 +80,17 @@ struct AppointmentService: AppointmentProtocol {
         guard let appointment = try await Appointment.find(object, on: req.db) else {
             throw Abort(.notFound, reason: "The appointment with ID of \(String(describing: object)) could not be found!")
         }
+        if let userId = appointment.user, let monitorId = appointment.monitorId {
+            let user = try await User.find(userId, on: req.db)
+            let monitor = try await User.find(monitorId, on: req.db)
+            
+            user?.appointments = user?.appointments?.filter { $0 != appointment.id }
+            monitor?.appointments = monitor?.appointments?.filter { $0 != appointment.id }
+            
+            try await user?.save(on: req.db)
+            try await monitor?.save(on: req.db)
+        }
+        
         try await appointment.delete(on: req.db)
         return .ok
     }
