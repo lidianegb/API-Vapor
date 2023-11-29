@@ -17,6 +17,12 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
 
+    let corsConfiguration = CORSMiddleware.Configuration(
+        allowedOrigin: .all,
+        allowedMethods: [.GET, .POST, .PUT, .DELETE, .PATCH, .OPTIONS],
+        allowedHeaders: [.accept, .authorization, .contentType, .xRequestedWith, .userAgent, .accessControlAllowOrigin])
+    let corsMiddleware = CORSMiddleware(configuration: corsConfiguration)
+    app.middleware.use(corsMiddleware)
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.workingDirectory))
     app.routes.defaultMaxBodySize = "30 MB"
     
